@@ -1,0 +1,180 @@
+/* ============================================
+   NEON CANVAS INTERFACE - Styles
+   ============================================ */
+
+/* Background & Layout */
+.neon-interface {
+    min-height: 100vh;
+    background-color: #0a0e27;
+    background-image:
+        linear-gradient(rgba(100, 200, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 200, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.interface-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 700px;
+    height: 80vh;
+}
+
+/* Canvas Container */
+.neon-canvas {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    min-height: 700px;
+    padding: 3rem;
+    border-radius: 20px;
+    background: rgba(10, 20, 50, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-sizing: border-box;
+    animation: borderGlow 3s ease-in-out infinite;
+}
+
+/* Gradient Border via pseudo-element */
+.neon-canvas::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    padding: 1px;
+    background: linear-gradient(135deg, #00ffff, #0088ff, #ff0088);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* Glow Pulse Animation */
+@keyframes borderGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 30px rgba(0, 255, 255, 0.2),
+            inset 0 0 30px rgba(0, 255, 255, 0.05);
+    }
+
+    50% {
+        box-shadow:
+            0 0 50px rgba(0, 255, 255, 0.3),
+            inset 0 0 40px rgba(0, 255, 255, 0.08);
+    }
+}
+
+/* ============================================
+   CORNER ACCENTS
+   ============================================ */
+.corner-accent {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* Top-Left — Cyan */
+.corner-accent.top-left {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid #00ffff;
+    border-left: 2px solid #00ffff;
+    border-radius: 20px 0 0 0;
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.4),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+/* Top-Right — Blue */
+.corner-accent.top-right {
+    top: -1px;
+    right: -1px;
+    border-top: 2px solid #0088ff;
+    border-right: 2px solid #0088ff;
+    border-radius: 0 20px 0 0;
+    box-shadow:
+        0 0 20px rgba(0, 136, 255, 0.4),
+        inset 0 0 20px rgba(0, 136, 255, 0.1);
+}
+
+/* Bottom-Left — Magenta */
+.corner-accent.bottom-left {
+    bottom: -1px;
+    left: -1px;
+    border-bottom: 2px solid #ff0088;
+    border-left: 2px solid #ff0088;
+    border-radius: 0 0 0 20px;
+    box-shadow:
+        0 0 20px rgba(255, 0, 136, 0.4),
+        inset 0 0 20px rgba(255, 0, 136, 0.1);
+}
+
+/* Bottom-Right — Lime */
+.corner-accent.bottom-right {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid #00ff88;
+    border-right: 2px solid #00ff88;
+    border-radius: 0 0 20px 0;
+    box-shadow:
+        0 0 20px rgba(0, 255, 136, 0.4),
+        inset 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .neon-interface {
+        padding: 2rem;
+    }
+
+    .neon-canvas {
+        padding: 2rem;
+        min-height: 400px;
+    }
+
+    .corner-accent {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .neon-interface {
+        padding: 1rem;
+    }
+
+    .neon-canvas {
+        padding: 1.5rem;
+        min-height: 350px;
+        border-radius: 14px;
+    }
+
+    .neon-canvas::before {
+        border-radius: 15px;
+    }
+
+    .corner-accent {
+        width: 35px;
+        height: 35px;
+    }
+}

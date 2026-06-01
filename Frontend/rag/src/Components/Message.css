@@ -1,0 +1,104 @@
+/* ============================================
+   MESSAGE DISPLAY - Neon Theme
+   ============================================ */
+
+.message-container {
+    width: 100%;
+    max-width: 700px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    background: rgba(10, 20, 50, 0.4);
+    border: 1px solid rgba(0, 255, 255, 0.08);
+    min-height: 400px;
+    max-height: 60vh;
+}
+
+/* Scrollbar Styling */
+.message-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.message-area::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.message-area::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.message-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.4);
+}
+
+/* Placeholder State */
+.message-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0.7;
+}
+
+.placeholder-icon {
+    margin-bottom: 0.5rem;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.placeholder-text {
+    color: rgba(0, 255, 255, 0.5);
+    font-size: 1.1rem;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    letter-spacing: 0.03em;
+}
+
+.placeholder-hint {
+    color: rgba(100, 200, 255, 0.3);
+    font-size: 0.85rem;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .message-container {
+        max-width: 90%;
+    }
+
+    .message-area {
+        min-height: 300px;
+        padding: 1rem;
+    }
+
+    .placeholder-text {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,30 @@
+/* ============================================
+   TRIGGER BUTTON - Neon Theme
+   ============================================ */
+
+.trigger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(0, 136, 255, 0.15));
+    color: #00ffff;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.15);
+}
+
+.trigger-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 136, 255, 0.3));
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.35);
+    transform: scale(1.08);
+}
+
+.trigger-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.25);
+}
