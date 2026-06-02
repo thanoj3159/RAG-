@@ -3,11 +3,9 @@ import './searchbar.css';
 import Trigger from './Trigger';
 import Modellist from './Modellist';
 
-function SearchBar() {
+function SearchBar({ onSearch, isLoading }) {
     const fileInputRef = useRef(null);
     const [query, setQuery] = useState('');
-    const [response, setResponse] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleUploadClick = () => {
         fileInputRef.current.click();
@@ -20,36 +18,17 @@ function SearchBar() {
         }
     };
 
-    const handleSearch = async () => {
-        if (!query.trim()) return;
-
-        setIsLoading(true);
-        setResponse(''); // Clear previous response
-
-        try {
-            const res = await fetch('http://localhost:3001/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: query }),
-            });
-
-            if (!res.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await res.json();
-            setResponse(data.response);
-        } catch (error) {
-            console.error('Error hitting the LLM API:', error);
-            setResponse('Error: Failed to connect to local AI assistant.');
-        } finally {
-            setIsLoading(false);
+    const handleTriggerClick = () => {
+        if (!isLoading) {
+            onSearch(query);
+            setQuery(''); // Clear input after sending
         }
     };
 
     const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            handleSearch();
+        if (e.key === 'Enter' && !isLoading) {
+            onSearch(query);
+            setQuery('');
         }
     };
 
@@ -76,21 +55,11 @@ function SearchBar() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    disabled={isLoading}
                 />
                 <Modellist />
-                <Trigger onClick={handleSearch} />
+                <Trigger onClick={handleTriggerClick} />
             </div>
-
-            {/* Display loading or the response */}
-            {(isLoading || response) && (
-                <div className="llm-response-container" style={{ marginTop: '20px', padding: '15px', color: 'white', background: '#1e1e1e', borderRadius: '10px', width: '100%', textAlign: 'left', minHeight: '50px' }}>
-                    {isLoading ? (
-                        <p style={{ color: '#00ffff' }}>Thinking...</p>
-                    ) : (
-                        <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{response}</p>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
