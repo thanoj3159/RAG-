@@ -15,7 +15,7 @@ function Interface() {
         setIsLoading(true);
 
         try {
-            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.6:3001';
             const res = await fetch(`${apiUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
