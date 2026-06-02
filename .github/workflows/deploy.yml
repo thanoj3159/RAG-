@@ -56,8 +56,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: ./Frontend/rag/package-lock.json
 
       - name: Install dependencies
@@ -68,6 +68,7 @@ jobs:
         env:
           # This injects your API key from GitHub Secrets into the build
           REACT_APP_API_KEY: ${{ secrets.API_KEY }}
+          REACT_APP_API_URL: REPLACE_THIS_WITH_YOUR_RENDER_URL
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
