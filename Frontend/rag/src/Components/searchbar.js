@@ -1,10 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import './searchbar.css';
 import Trigger from './Trigger';
 import Modellist from './Modellist';
 
 function SearchBar() {
     const fileInputRef = useRef(null);
+    const [query, setQuery] = useState('');
+    const [response, setResponse] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleUploadClick = () => {
         fileInputRef.current.click();
@@ -14,6 +17,39 @@ function SearchBar() {
         const files = e.target.files;
         if (files.length > 0) {
             console.log('Selected files:', files);
+        }
+    };
+
+    const handleSearch = async () => {
+        if (!query.trim()) return;
+
+        setIsLoading(true);
+        setResponse(''); // Clear previous response
+
+        try {
+            const res = await fetch('http://localhost:3001/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: query }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await res.json();
+            setResponse(data.response);
+        } catch (error) {
+            console.error('Error hitting the LLM API:', error);
+            setResponse('Error: Failed to connect to local AI assistant.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
         }
     };
 
@@ -37,10 +73,24 @@ function SearchBar() {
                     type="text"
                     className="searchbar-input"
                     placeholder="Search anything..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
                 <Modellist />
-                <Trigger />
+                <Trigger onClick={handleSearch} />
             </div>
+
+            {/* Display loading or the response */}
+            {(isLoading || response) && (
+                <div className="llm-response-container" style={{ marginTop: '20px', padding: '15px', color: 'white', background: '#1e1e1e', borderRadius: '10px', width: '100%', textAlign: 'left', minHeight: '50px' }}>
+                    {isLoading ? (
+                        <p style={{ color: '#00ffff' }}>Thinking...</p>
+                    ) : (
+                        <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{response}</p>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
