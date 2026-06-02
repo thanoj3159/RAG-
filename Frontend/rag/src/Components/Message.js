@@ -12,7 +12,7 @@ function Message() {
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     </div>
-                    <p className="placeholder-text">Your messages will appear here</p>
+                    <p className="placeholder-text">Testing update</p>
                     <p className="placeholder-hint">Ask anything to get started</p>
                 </div>
             </div>
