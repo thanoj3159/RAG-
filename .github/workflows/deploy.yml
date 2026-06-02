@@ -68,7 +68,7 @@ jobs:
         env:
           # This injects your API key from GitHub Secrets into the build
           REACT_APP_API_KEY: ${{ secrets.API_KEY }}
-          REACT_APP_API_URL: REPLACE_THIS_WITH_YOUR_RENDER_URL
+          REACT_APP_API_URL: https://rag-service-vbcq.onrender.com
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
