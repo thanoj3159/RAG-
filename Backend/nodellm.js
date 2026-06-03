@@ -21,7 +21,11 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Message is required in the request body" });
         }
 
-        const completion = await openai.chat.completions.create({
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const stream = await openai.chat.completions.create({
             model: "meta/llama-3.1-8b-instruct",
             messages: [{ "role": "user", "content": message }],
             temperature: 1.0,
@@ -30,7 +34,13 @@ app.post('/chat', async (req, res) => {
             stream: true
         });
 
-        res.json({ response: completion.choices[0]?.message?.content || '' });
+        for await (const chunk of stream) {
+            const text = chunk.choices[0]?.delta?.content || '';
+            if (text) {
+                res.write(text);
+            }
+        }
+        res.end();
     } catch (error) {
         console.error("Error connecting to LLM:", error);
         res.status(500).json({ error: "Internal server error" });

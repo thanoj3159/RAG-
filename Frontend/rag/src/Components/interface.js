@@ -15,7 +15,7 @@ function Interface() {
         setIsLoading(true);
 
         try {
-            const apiUrl = process.env.REACT_APP_API_URL || 'http://192.168.1.6:3001';
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
             const res = await fetch(`${apiUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -26,8 +26,29 @@ function Interface() {
                 throw new Error('Network response was not ok');
             }
 
-            const data = await res.json();
-            setMessages((prev) => [...prev, { role: 'assistant', content: data.response }]);
+            // Setup placeholder empty message for the assistant
+            setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let done = false;
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                done = readerDone;
+                if (value) {
+                    const chunk = decoder.decode(value, { stream: true });
+                    setMessages((prev) => {
+                        const newMsgs = [...prev];
+                        const lastMsg = newMsgs[newMsgs.length - 1];
+                        newMsgs[newMsgs.length - 1] = {
+                            ...lastMsg,
+                            content: lastMsg.content + chunk
+                        };
+                        return newMsgs;
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error hitting the LLM API:', error);
             setMessages((prev) => [...prev, { role: 'assistant', content: 'Error: Failed to connect to local AI assistant.' }]);
