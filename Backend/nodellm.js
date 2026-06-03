@@ -31,7 +31,7 @@ app.post('/chat', async (req, res) => {
         const stream = await openai.chat.completions.create({
             model: "meta/llama-3.1-8b-instruct",
             messages: chatHistory,
-            temperature: 1.0,
+            temperature: 0.5,
             top_p: 0.7,
             max_tokens: 500,
             stream: true
