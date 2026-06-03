@@ -13,19 +13,18 @@ const openai = new OpenAI({
     timeout: 10000 // Fails fast if the API hangs, preventing Postman from hanging
 });
 
-// ✅ Initialize Stateful Memory
-const chatHistory = [];
+// ✅ Memory is managed by the frontend (survives server restarts)
 
 app.post('/chat', async (req, res) => {
     try {
-        const { message } = req.body;
+        const { message, history = [] } = req.body;
 
         if (!message) {
             return res.status(400).json({ error: "Message is required in the request body" });
         }
 
-        // ✅ Add user message to memory
-        chatHistory.push({ role: "user", content: message });
+        // ✅ Build full context from frontend history + new user message
+        const chatHistory = [...history, { role: "user", content: message }];
 
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
@@ -51,8 +50,7 @@ app.post('/chat', async (req, res) => {
             }
         }
 
-        // ✅ Add assistant response to memory AFTER stream finishes
-        chatHistory.push({ role: "assistant", content: assistantResponse });
+        // ✅ History is maintained by frontend — no server push needed
 
         res.end();
     } catch (error) {
@@ -61,9 +59,9 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-// ✅ Use PORT 3002 to avoid conflicting with nodellm.js
-const PORT = 3002;
+// ✅ Use process.env.PORT for Render, fallback to 3002 for local dev
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
-    console.log(`Stateful Server (with memory) is running on http://localhost:${PORT}`);
+    console.log(`Stateful Server (with memory) is running on port ${PORT}`);
     console.log(`You can POST to http://localhost:${PORT}/chat with { "message": "your prompt" }`);
 });
