@@ -23,8 +23,18 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Message is required in the request body" });
         }
 
-        // ✅ Build full context from frontend history + new user message
-        const chatHistory = [...history, { role: "user", content: message }];
+        // ✅ Build full context from system prompt + frontend history + new user message
+        const systemPrompt = `You are a helpful chatbot. 
+IMPORTANT: Always respect the user's actual name and identity. 
+If a user introduces themselves with a name, use that name exactly as they provided it.
+Do not assume names are references to fictional characters.
+Keep responses natural and friendly.`;
+
+        const chatHistory = [
+            { role: "system", content: systemPrompt },
+            ...history,
+            { role: "user", content: message }
+        ];
 
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');

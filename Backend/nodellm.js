@@ -26,7 +26,16 @@ app.post('/chat', async (req, res) => {
         res.setHeader('Connection', 'keep-alive');
 
         // ✅ Build full conversation context from frontend history
-        const chatHistory = [...history, { role: "user", content: message }];
+        const systemPrompt = `You are a helpful chatbot. 
+IMPORTANT: Always respect the user's actual name and identity. 
+If a user introduces themselves with a name, use that name exactly as they provided it.
+Do not assume names are references to fictional characters.
+Keep responses natural and friendly.`;
+        const chatHistory = [
+            { role: "system", content: systemPrompt },
+            ...history,
+            { role: "user", content: message }
+        ];
 
         const stream = await openai.chat.completions.create({
             model: "meta/llama-3.1-8b-instruct",
