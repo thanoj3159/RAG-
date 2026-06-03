@@ -15,7 +15,7 @@ function Interface() {
         setIsLoading(true);
 
         try {
-            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3002'; // Pointing to context1.js (Stateful Server)
+            const apiUrl = 'http://localhost:3002'; // Hardcoded to Stateful Server
             const res = await fetch(`${apiUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
