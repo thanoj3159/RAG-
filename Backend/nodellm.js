@@ -15,7 +15,7 @@ const openai = new OpenAI({
 
 app.post('/chat', async (req, res) => {
     try {
-        const { message } = req.body;
+        const { message, history = [] } = req.body;
 
         if (!message) {
             return res.status(400).json({ error: "Message is required in the request body" });
@@ -25,9 +25,12 @@ app.post('/chat', async (req, res) => {
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
+        // ✅ Build full conversation context from frontend history
+        const chatHistory = [...history, { role: "user", content: message }];
+
         const stream = await openai.chat.completions.create({
             model: "meta/llama-3.1-8b-instruct",
-            messages: [{ "role": "user", "content": message }],
+            messages: chatHistory,
             temperature: 1.0,
             top_p: 0.7,
             max_tokens: 500,
@@ -47,8 +50,8 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
     console.log(`You can POST to http://localhost:${PORT}/chat with { "message": "your prompt" }`);
 });
