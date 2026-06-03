@@ -27,7 +27,7 @@ app.post('/chat', async (req, res) => {
             temperature: 1.0,
             top_p: 0.7,
             max_tokens: 500,
-            stream: false
+            stream: true
         });
 
         res.json({ response: completion.choices[0]?.message?.content || '' });
