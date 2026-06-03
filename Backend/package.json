@@ -4,6 +4,7 @@
   "description": "",
   "main": "Langchain.js",
   "scripts": {
+    "start": "node context1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

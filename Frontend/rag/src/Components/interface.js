@@ -15,11 +15,14 @@ function Interface() {
         setIsLoading(true);
 
         try {
-            const apiUrl = 'http://localhost:3002'; // Hardcoded to Stateful Server
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3002';
             const res = await fetch(`${apiUrl}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: query }),
+                body: JSON.stringify({
+                    message: query,
+                    history: messages.map(m => ({ role: m.role, content: m.content }))
+                }),
             });
 
             if (!res.ok) {
