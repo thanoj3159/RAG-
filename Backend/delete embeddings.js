@@ -40,10 +40,46 @@
  * -----------------------------------------------------------
  */
 
-import { ChromaClient } from 'chromadb';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { ChromaClient, CloudClient } from 'chromadb';
 
-const client = new ChromaClient({ path: process.env.CHROMA_URL || 'http://localhost:8000' });
-const collection = await client.getOrCreateCollection({ name: 'pdf-collection' });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env if it exists in parent or current directory
+const envPath = path.resolve(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    for (const line of envConfig.split('\n')) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+            const index = trimmed.indexOf('=');
+            if (index !== -1) {
+                const key = trimmed.substring(0, index).trim();
+                const val = trimmed.substring(index + 1).trim().replace(/^['"]|['"]$/g, '');
+                process.env[key] = val;
+            }
+        }
+    }
+}
+
+const client = process.env.CHROMA_API_KEY
+    ? new CloudClient({
+          apiKey:   process.env.CHROMA_API_KEY,
+          tenant:   process.env.CHROMA_TENANT,
+          database: process.env.CHROMA_DATABASE || 'default_database',
+      })
+    : new ChromaClient({
+          path: process.env.CHROMA_URL || 'http://localhost:8000',
+      });
+
+console.log(process.env.CHROMA_API_KEY
+    ? `☁️  Connecting to Chroma Cloud (tenant: ${process.env.CHROMA_TENANT})`
+    : `🏠 Connecting to local ChromaDB (${process.env.CHROMA_URL || 'http://localhost:8000'})`);
+
+let collection = await client.getOrCreateCollection({ name: 'pdf-collection' });
 
 const target = process.argv[2];
 
@@ -51,13 +87,16 @@ if (!target) {
     const all = await collection.get({ include: ['metadatas'] });
     const sources = [...new Set(all.metadatas.map(m => m.source))];
     console.log('Files in pdf-collection:');
+    if (sources.length === 0) {
+        console.log('  (no files found)');
+    }
     for (const s of sources) {
         const count = all.metadatas.filter(m => m.source === s).length;
         console.log(`  ${count} chunks  -  ${s}`);
     }
 } else if (target === '--all') {
     await client.deleteCollection({ name: 'pdf-collection' });
-    await client.createCollection({ name: 'pdf-collection' });
+    collection = await client.createCollection({ name: 'pdf-collection' });
     console.log('Deleted ALL chunks (recreated empty collection).');
 } else {
     await collection.delete({ where: { source: target } });
@@ -66,3 +105,4 @@ if (!target) {
 
 const after = await collection.count();
 console.log(`Remaining: ${after}`);
+
