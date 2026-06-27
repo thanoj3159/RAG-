@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { testChromaConnection, getPdfCollection, storeEmbeddings } from './VectorDatabase/Chromadb.js';
 import { loadAndSplitPDFs } from './VectorDatabase/injectFile_splitter_lib.js';
 import { embedChunks } from './VectorDatabase/Embeddings.js';
+import { handleRAGChat } from './QueryonPDF/Context.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,12 +32,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const openai = new OpenAI({
-    apiKey: process.env.API_KEY || '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',
-    baseURL: 'https://integrate.api.nvidia.com/v1',
-    maxRetries: 1,
-    timeout: 10000 // Fails fast if the API hangs, preventing Postman from hanging
-});
+// OpenAI client is now managed inside QueryonPDF/Context.js (RAG pipeline)
 
 // ✅ Memory is managed by the frontend (survives server restarts)
 
@@ -93,54 +89,27 @@ app.get('/status', async (req, res) => {
     }
 });
 
+// ✅ RAG-powered chat — embeds question → retrieves PDF chunks → streams grounded answer
 app.post('/chat', async (req, res) => {
     try {
         const { message, history = [] } = req.body;
 
         if (!message) {
-            return res.status(400).json({ error: "Message is required in the request body" });
+            return res.status(400).json({ error: 'Message is required in the request body' });
         }
-
-        // ✅ Build full context from system prompt + frontend history + new user message
-        const systemPrompt = `You are a helpful chatbot. 
-IMPORTANT: Always respect the user's actual name and identity. 
-If a user introduces themselves with a name, use that name exactly as they provided it.
-Do not assume names are references to fictional characters.
-Keep responses natural and friendly, if you unwilling to answer simply say i dont know.`;
-
-        const chatHistory = [
-            { role: "system", content: systemPrompt },
-            ...history,
-            { role: "user", content: message }
-        ];
 
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        const stream = await openai.chat.completions.create({
-            model: "meta/llama-3.1-8b-instruct",
-            messages: chatHistory, // ✅ Pass full memory context to the AI
-            temperature: 1.0,
-            top_p: 0.7,
-            max_tokens: 500,
-            stream: true
-        });
-
-        for await (const chunk of stream) {
-            // Some models put the delta in `content`, some don't. We use optional chaining.
-            const text = chunk.choices[0]?.delta?.content || '';
-            if (text) {
-                res.write(text);
-            }
-        }
-
-        // ✅ History is maintained by frontend — no server push needed
-
-        res.end();
+        await handleRAGChat(message, history, res);
     } catch (error) {
-        console.error("Error connecting to LLM:", error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error('❌ RAG chat error:', error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Internal server error' });
+        } else {
+            res.end();
+        }
     }
 });
 
