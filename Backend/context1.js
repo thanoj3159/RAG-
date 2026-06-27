@@ -3,11 +3,16 @@ import cors from 'cors';
 import OpenAI from 'openai';
 import multer from 'multer';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { testChromaConnection, getPdfCollection, storeEmbeddings } from './VectorDatabase/Chromadb.js';
 import { loadAndSplitPDFs } from './VectorDatabase/injectFile_splitter_lib.js';
 import { embedChunks } from './VectorDatabase/Embeddings.js';
 
-const uploadDir = 'c:\\Users\\chari\\Desktop\\RAG\\Frontend\\PDF_Storage';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const uploadDir = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'Frontend', 'PDF_Storage');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }

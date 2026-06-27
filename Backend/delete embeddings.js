@@ -42,7 +42,7 @@
 
 import { ChromaClient } from 'chromadb';
 
-const client = new ChromaClient({ path: 'http://localhost:8000' });
+const client = new ChromaClient({ path: process.env.CHROMA_URL || 'http://localhost:8000' });
 const collection = await client.getOrCreateCollection({ name: 'pdf-collection' });
 
 const target = process.argv[2];

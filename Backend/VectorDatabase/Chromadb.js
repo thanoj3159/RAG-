@@ -3,7 +3,7 @@ import { ChromaClient } from 'chromadb';
 // Initialize the ChromaDB client
 // Assuming ChromaDB is running locally on the default port 8000
 const chromaClient = new ChromaClient({
-    path: 'http://localhost:8000',
+    path: process.env.CHROMA_URL || 'http://localhost:8000',
 });
 
 const COLLECTION_NAME = "pdf-collection";
