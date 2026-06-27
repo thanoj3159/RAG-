@@ -1,0 +1,33 @@
+services:
+  # ── Node.js Backend (RAG API) ───────────────────────────────────────────────
+  - type: web
+    name: rag-backend
+    runtime: docker
+    dockerfilePath: ./Backend/Dockerfile
+    dockerContext: ./Backend
+    plan: free
+    healthCheckPath: /status
+
+    envVars:
+      # Nvidia API Key — set this in the Render Dashboard (keep it secret)
+      - key: API_KEY
+        sync: false
+
+      # ── Chroma Cloud credentials ──────────────────────────────────────────
+      # Sign up free at https://trychroma.com, then paste your values below
+      # or set them in the Render Dashboard under Environment Variables.
+      - key: CHROMA_API_KEY
+        sync: false   # paste your Chroma Cloud API key in the Render dashboard
+
+      - key: CHROMA_TENANT
+        sync: false   # e.g.  abc12345-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+      - key: CHROMA_DATABASE
+        value: default_database   # change if you named your database differently
+
+      # Upload directory — use /tmp on Render (ephemeral, but vectors go to cloud)
+      - key: UPLOAD_DIR
+        value: /tmp/pdf_storage
+
+      - key: NODE_ENV
+        value: production

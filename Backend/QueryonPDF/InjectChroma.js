@@ -1,8 +1,15 @@
-import { ChromaClient } from 'chromadb';
+import { ChromaClient, CloudClient } from 'chromadb';
 
-const chromaClient = new ChromaClient({
-    path: process.env.CHROMA_URL || 'http://localhost:8000',
-});
+// Cloud when CHROMA_API_KEY is set, local otherwise
+const chromaClient = process.env.CHROMA_API_KEY
+    ? new CloudClient({
+          apiKey:   process.env.CHROMA_API_KEY,
+          tenant:   process.env.CHROMA_TENANT,
+          database: process.env.CHROMA_DATABASE || 'default_database',
+      })
+    : new ChromaClient({
+          path: process.env.CHROMA_URL || 'http://localhost:8000',
+      });
 
 const COLLECTION_NAME = 'pdf-collection';
 const TOP_K = 4; // number of relevant chunks to retrieve

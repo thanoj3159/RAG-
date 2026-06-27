@@ -1,10 +1,21 @@
-import { ChromaClient } from 'chromadb';
+import { ChromaClient, CloudClient } from 'chromadb';
 
-// Initialize the ChromaDB client
-// Assuming ChromaDB is running locally on the default port 8000
-const chromaClient = new ChromaClient({
-    path: process.env.CHROMA_URL || 'http://localhost:8000',
-});
+// ── Client selection ───────────────────────────────────────────────────────────
+// When CHROMA_API_KEY is set → Chroma Cloud (free tier at trychroma.com)
+// Otherwise                  → local ChromaDB at localhost:8000
+const chromaClient = process.env.CHROMA_API_KEY
+    ? new CloudClient({
+          apiKey:   process.env.CHROMA_API_KEY,
+          tenant:   process.env.CHROMA_TENANT,
+          database: process.env.CHROMA_DATABASE || 'default_database',
+      })
+    : new ChromaClient({
+          path: process.env.CHROMA_URL || 'http://localhost:8000',
+      });
+
+console.log(process.env.CHROMA_API_KEY
+    ? `☁️  ChromaDB: Chroma Cloud (tenant: ${process.env.CHROMA_TENANT})`
+    : `🏠 ChromaDB: local  (${process.env.CHROMA_URL || 'http://localhost:8000'})`);
 
 const COLLECTION_NAME = "pdf-collection";
 
