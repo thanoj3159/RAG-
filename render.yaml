@@ -14,18 +14,17 @@ services:
         sync: false
 
       # ── Chroma Cloud credentials ──────────────────────────────────────────
-      # Sign up free at https://trychroma.com, then paste your values below
-      # or set them in the Render Dashboard under Environment Variables.
+      # From your trychroma.com dashboard
       - key: CHROMA_API_KEY
-        sync: false   # paste your Chroma Cloud API key in the Render dashboard
+        sync: false   # paste: ck-7NA27N1jTJD...
 
       - key: CHROMA_TENANT
-        sync: false   # e.g.  abc12345-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        sync: false   # paste: 93f2f1c8-ff50-4e73-8736-8fb8902a20cf
 
       - key: CHROMA_DATABASE
-        value: default_database   # change if you named your database differently
+        value: Rag_Production
 
-      # Upload directory — use /tmp on Render (ephemeral, but vectors go to cloud)
+      # Upload directory — /tmp is writable on Render free tier
       - key: UPLOAD_DIR
         value: /tmp/pdf_storage
 
