@@ -12,12 +12,18 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.9",
+    "@langchain/community": "^1.1.29",
     "@langchain/core": "^1.1.48",
     "@langchain/openai": "^1.4.7",
+    "@langchain/textsplitters": "^1.0.1",
     "axios": "^1.16.1",
+    "chromadb": "^3.4.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "langchain": "^1.4.4",
-    "openai": "^6.41.0"
+    "multer": "^2.1.1",
+    "openai": "^6.41.0",
+    "pdf-parse": "^1.1.1"
   }
 }

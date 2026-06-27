@@ -1,3 +1,14 @@
 .env
 .env.*
 node_modules/
+
+# Chroma database
+chroma/
+
+# Uploaded PDFs
+Frontend/PDF_Storage/*.pdf
+
+# Temp text files and logs
+Backend/chunks_output.txt
+Backend/out.txt
+Backend/*.log

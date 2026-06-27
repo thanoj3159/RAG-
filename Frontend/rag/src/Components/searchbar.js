@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import './searchbar.css';
 import Trigger from './Trigger';
 import Modellist from './Modellist';
+import { uploadPDF } from './Fileinjecting';
 
 function SearchBar({ onSearch, isLoading }) {
     const fileInputRef = useRef(null);
@@ -11,11 +12,25 @@ function SearchBar({ onSearch, isLoading }) {
         fileInputRef.current.click();
     };
 
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         const files = e.target.files;
         if (files.length > 0) {
             console.log('Selected files:', files);
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type === 'application/pdf' || files[i].name.endsWith('.pdf')) {
+                    try {
+                        await uploadPDF(files[i]);
+                        alert(`Uploaded ${files[i].name} successfully!`);
+                    } catch (err) {
+                        alert(`Failed to upload ${files[i].name}`);
+                    }
+                } else {
+                    alert(`${files[i].name} is not a PDF file. Please upload a PDF.`);
+                }
+            }
         }
+        // clear the input so the same file can be uploaded again if needed
+        e.target.value = null;
     };
 
     const handleTriggerClick = () => {
