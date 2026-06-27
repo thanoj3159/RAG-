@@ -5,13 +5,34 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { initLangSmith } from './LangSmith/tracer.js';
 import { testChromaConnection, getPdfCollection, storeEmbeddings } from './VectorDatabase/Chromadb.js';
 import { loadAndSplitPDFs } from './VectorDatabase/injectFile_splitter_lib.js';
 import { embedChunks } from './VectorDatabase/Embeddings.js';
+import { isEnabled } from './LangSmith/tracer.js';
+import { tracedRAGPipeline } from './LangSmith/rag-tracer.js';
 import { handleRAGChat } from './QueryonPDF/Context.js';
+import { traceable } from 'langsmith/traceable';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load .env if it exists in parent directory (for robust local dev execution)
+const envPath = path.resolve(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    for (const line of envConfig.split('\n')) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+            const index = trimmed.indexOf('=');
+            if (index !== -1) {
+                const key = trimmed.substring(0, index).trim();
+                const val = trimmed.substring(index + 1).trim().replace(/^['"]|['"]$/g, '');
+                process.env[key] = val;
+            }
+        }
+    }
+}
 
 const uploadDir = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', 'Frontend', 'PDF_Storage');
 if (!fs.existsSync(uploadDir)) {
@@ -31,6 +52,8 @@ const upload = multer({ storage: storage });
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+initLangSmith();
 
 // OpenAI client is now managed inside QueryonPDF/Context.js (RAG pipeline)
 
@@ -54,7 +77,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
 let pipelineQueue = Promise.resolve();
 
-async function runEmbeddingPipeline(filePath, originalName) {
+const runEmbeddingPipeline = traceable(async function runEmbeddingPipeline(filePath, originalName) {
     try {
         console.log(`\n🚀 Auto-embedding pipeline started for: ${originalName}`);
         // ✅ Process ONLY the uploaded file (no re-scanning of the whole folder)
@@ -68,7 +91,7 @@ async function runEmbeddingPipeline(filePath, originalName) {
     } catch (err) {
         console.error('❌ Background embedding pipeline failed:', err.message);
     }
-}
+}, { name: 'run_embedding_pipeline', tags: ['ingestion', 'pdf'] });
 
 // ✅ Status endpoint — check how many vectors are stored in ChromaDB
 app.get('/status', async (req, res) => {
@@ -102,7 +125,11 @@ app.post('/chat', async (req, res) => {
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        await handleRAGChat(message, history, res);
+        if (isEnabled()) {
+            await tracedRAGPipeline(message, history, res);
+        } else {
+            await handleRAGChat(message, history, res);
+        }
     } catch (error) {
         console.error('❌ RAG chat error:', error);
         if (!res.headersSent) {
@@ -116,6 +143,7 @@ app.post('/chat', async (req, res) => {
 // ✅ Use process.env.PORT for Render, fallback to 3002 for local dev
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, async () => {
+    initLangSmith();
     console.log(`\n🚀 Stateful Server running on port ${PORT}`);
     console.log(`   Chat:   POST http://localhost:${PORT}/chat`);
     console.log(`   Upload: POST http://localhost:${PORT}/upload`);

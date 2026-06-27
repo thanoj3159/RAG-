@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
+import { wrapOpenAI } from 'langsmith/wrappers';
 
 const API_KEY = process.env.API_KEY || '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';
-const openai = new OpenAI({
+const openai = wrapOpenAI(new OpenAI({
     apiKey: API_KEY,
     baseURL: 'https://integrate.api.nvidia.com/v1',
-});
+}));
 
 const EMBEDDING_MODEL = 'nvidia/nv-embed-v1';
 
